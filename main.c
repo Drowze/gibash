@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <unistd.h>
+#include <time.h>
 #include <sys/wait.h>
 
 int break_input (char *input, char *argv[]) {
@@ -54,6 +55,19 @@ int executar(char *argv[]) {
     }
 }
 
+const char *get_time() {
+    time_t timer;
+    char *buffer = malloc(14 * sizeof(char));
+    struct tm* tm_info;
+
+    time(&timer);
+    tm_info = localtime(&timer);
+
+    strftime(buffer, 14, "[%d/%m %H:%M]", tm_info);
+
+    return buffer;
+}
+
 int main (int argc, char *argv[]) {
     int i;
     char *input = NULL;
@@ -61,7 +75,7 @@ int main (int argc, char *argv[]) {
     ssize_t read;
 
    while(1) {
-        printf("# ");
+        printf("%s # ", get_time());
         if((read = getline(&input, &len, stdin)) == -1)
             break;
         strtok(input, "\n"); // remove \n
