@@ -33,12 +33,25 @@ char **string_split_sized_matrix (char *str) {
     return matrix;
 }
 
-int exec_prog(char *argv[]) {
+int executar(char *argv[]) {
     pid_t child_pid;
     int child_status;
 
     child_pid = fork();
-    return 0;
+
+    if(child_pid == 0) {
+        /* This is done by the child process. */
+        execvp(argv[0], argv);
+        /* If execv returns, it must have failed. */
+        printf("Unknown command\n");
+        exit(0);
+    }
+    else {
+       /* This is run by the parent. Wait for the child to terminate. */
+        pid_t tpid = wait(&child_status);
+
+       return child_status;
+    }
 }
 
 int main (int argc, char *argv[]) {
@@ -47,14 +60,20 @@ int main (int argc, char *argv[]) {
     size_t len = 0;
     ssize_t read;
 
-    printf("# ");
-    read = getline(&input, &len, stdin);
+   while(1) {
+        printf("# ");
+        if((read = getline(&input, &len, stdin)) == -1)
+            break;
+        strtok(input, "\n"); // remove \n
 
-    char **internal_argv = string_split_sized_matrix(input);
-    int internal_argc = break_input(input, internal_argv);
+        /* create a array of char pointers, with size equal to spaces in string + 1 */
+        char **internal_argv = string_split_sized_matrix(input);
+        /* allocate the address of each first letter to the spaces in the created array*/
+        int internal_argc = break_input(input, internal_argv);
 
-    for(int i = 0; internal_argv[i]; i++)
-      printf("%d: %s\n", i, internal_argv[i]);
+        /* execute internal_argv[0] with internal_argv as arguments */
+        executar(internal_argv);
+    }
 
     return 0;
 }
